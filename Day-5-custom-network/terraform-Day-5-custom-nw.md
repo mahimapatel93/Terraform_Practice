@@ -14,7 +14,7 @@ Create a **custom AWS network** using Terraform that includes:
 
 ---
 
-## 🧱 Architecture Overview
+## 🧱 Architecture Overview 
 
 * **VPC CIDR:** `10.0.0.0/16`
 * **Public Subnet:** `10.0.1.0/24`
