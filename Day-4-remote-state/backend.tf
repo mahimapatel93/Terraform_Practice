@@ -1,6 +1,6 @@
 terraform {
   backend "s3" {
-    bucket = "remote-states3bucket"
+    bucket = "the-new-stranger-things"
     key    = "day-4/terraform.tfstate"
     region = "us-east-1"
     # Enable S3 native locking
