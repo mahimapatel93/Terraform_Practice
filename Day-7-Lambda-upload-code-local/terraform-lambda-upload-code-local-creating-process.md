@@ -111,7 +111,5 @@ IAM Role → Policy → ZIP File → Lambda Function
 
 ## 🧠 One-Line Explanation (Interview)
 
-"Day-7 me maine Terraform use karke IAM role banaya,  
-local ZIP file upload ki aur Lambda function deploy ki."
-
+"In Day-7, I used Terraform to create an IAM role, uploaded a local ZIP file, and deployed a Lambda function."
 ---
