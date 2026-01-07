@@ -58,8 +58,8 @@ resource "aws_s3_bucket" "lambda_bucket" {
 ```hcl
 resource "aws_s3_object" "lambda_code" {
   bucket = aws_s3_bucket.lambda_bucket.id
-  key    = "git-final-notes-7pm.zip"
-  source = "git-final-notes-7pm.zip"
+  key    = "app.zip"
+  source = "app.zip"
 }
 ```
 
@@ -73,8 +73,8 @@ resource "aws_lambda_function" "my_lambda" {
   runtime          = "python3.12"
   timeout          = 900
   memory_size      = 128
-  filename         = "git-final-notes-7pm.zip"
-  source_code_hash = filebase64sha256("git-final-notes-7pm.zip")
+  filename         = "app.zip"
+  source_code_hash = filebase64sha256("app.zip")
 }
 ```
 
