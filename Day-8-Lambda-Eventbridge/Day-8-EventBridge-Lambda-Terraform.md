@@ -1,43 +1,54 @@
-<!-- 📘 Day-8 – EventBridge Scheduled Lambda using Terraform
-🎯 Objective
+# 📘 Day-8 – EventBridge Scheduled Lambda using Terraform
 
-To automate a Lambda function using Amazon EventBridge by:
+## 🎯 Objective
 
-Creating a scheduled EventBridge rule
+To automate a Lambda function using **Amazon EventBridge** by:
 
-Triggering a Lambda function every 5 minutes
+- Creating a scheduled EventBridge rule  
+- Triggering a Lambda function every **5 minutes**  
+- Managing everything using **Terraform (Infrastructure as Code)**  
 
-Managing everything using Terraform (IaC)
+---
 
-🧠 Concept Overview
-🔹 What is AWS EventBridge?
+## 🧠 Concept Overview
 
-Amazon EventBridge is a serverless event scheduler and event router that:
+### 🔹 What is AWS EventBridge?
 
-Triggers AWS services automatically
+Amazon EventBridge is a **serverless event scheduler and event router** that:
 
-Works with scheduled rules (cron / rate) or AWS service events
+- Triggers AWS services automatically  
+- Works with:
+  - Scheduled rules (**cron / rate**)
+  - AWS service events  
 
-👉 In this task, EventBridge triggers a Lambda function every 5 minutes.
+👉 In this task, **EventBridge triggers a Lambda function every 5 minutes**.
 
-🧩 Architecture Flow
+---
+
+## 🧩 Architecture Flow
+
 EventBridge Rule (Cron Schedule)
-          ↓
-   Lambda Permission
-          ↓
-     Lambda Function
+↓
+Lambda Permission
+↓
+Lambda Function
 
-🛠 Terraform Configuration Explanation
-1️⃣ AWS Provider
+yaml
+Copy code
+
+---
+
+## 🛠 Terraform Configuration Explanation
+
+### 1️⃣ AWS Provider
 
 Defines the AWS region where resources will be created.
 
+```hcl
 provider "aws" {
   region = "us-east-1"
 }
-
 2️⃣ Lambda Function
-
 Creates a Lambda function with:
 
 Python runtime
@@ -46,6 +57,8 @@ Python runtime
 
 Packaged code (lambda_function.zip)
 
+hcl
+Copy code
 resource "aws_lambda_function" "example" {
   function_name = "example-scheduled-lambda"
   role          = aws_iam_role.lambda_exec.arn
@@ -57,14 +70,14 @@ resource "aws_lambda_function" "example" {
   filename         = "lambda_function.zip"
   source_code_hash = filebase64sha256("lambda_function.zip")
 }
-
-
-📌 source_code_hash ensures Lambda updates only when code changes.
+📌 Note:
+source_code_hash ensures Lambda updates only when code changes.
 
 3️⃣ IAM Role for Lambda
+Allows Lambda service to assume the IAM role.
 
-Allows Lambda service to assume the role.
-
+hcl
+Copy code
 resource "aws_iam_role" "lambda_exec" {
   name = "lambda_exec_role"
 
@@ -79,28 +92,26 @@ resource "aws_iam_role" "lambda_exec" {
     }]
   })
 }
-
 4️⃣ Attach Basic Execution Policy
-
 Grants permission to write logs to CloudWatch Logs.
 
+hcl
+Copy code
 resource "aws_iam_role_policy_attachment" "lambda_logging" {
   role       = aws_iam_role.lambda_exec.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
-
 5️⃣ EventBridge Rule (Cron Schedule)
-
 Runs the Lambda every 5 minutes using a cron expression.
 
+h
+Copy code
 resource "aws_cloudwatch_event_rule" "every_five_minutes" {
   name        = "every-five-minutes"
   description = "Trigger Lambda every 5 minutes"
   schedule_expression = "cron(0/5 * * * ? *)"
 }
-
-
-📌 Cron expression breakdown:
+📌 Cron Expression Breakdown:
 
 0/5 → every 5 minutes
 
@@ -109,19 +120,20 @@ resource "aws_cloudwatch_event_rule" "every_five_minutes" {
 ? → no specific day of week
 
 6️⃣ EventBridge Target
-
 Connects the EventBridge rule to the Lambda function.
 
+hcl
+Copy code
 resource "aws_cloudwatch_event_target" "invoke_lambda" {
   rule      = aws_cloudwatch_event_rule.every_five_minutes.name
   target_id = "lambda"
   arn       = aws_lambda_function.example.arn
 }
-
-7️⃣ Lambda Permission (Most Important 🔥)
-
+7️⃣ Lambda Permission (🔥 Most Important)
 Allows EventBridge to invoke the Lambda function.
 
+hcl
+Copy code
 resource "aws_lambda_permission" "allow_eventbridge" {
   statement_id  = "AllowExecutionFromEventBridge"
   action        = "lambda:InvokeFunction"
@@ -129,21 +141,17 @@ resource "aws_lambda_permission" "allow_eventbridge" {
   principal     = "events.amazonaws.com"
   source_arn    = aws_cloudwatch_event_rule.every_five_minutes.arn
 }
-
-
 🚨 Without this permission, EventBridge cannot trigger Lambda
 
 🧪 Execution Result
-
 ✅ Lambda runs automatically every 5 minutes
 ✅ Logs visible in CloudWatch Logs
 ✅ Fully automated & serverless solution
 
 📌 Key Interview Points
-
 EventBridge replaces traditional cron jobs
 
-Lambda permission is mandatory
+aws_lambda_permission is mandatory
 
 EventBridge supports:
 
@@ -153,31 +161,25 @@ AWS service events
 
 Custom events
 
-Cron gives more control than rate
+cron provides more control than rate
 
 ❓ Interview Q&A
 Q1. Why use EventBridge with Lambda?
-
 👉 To run Lambda automatically without managing servers or cron machines.
 
 Q2. Difference between rate and cron?
-
 👉 rate is simple, cron provides detailed scheduling control.
 
 Q3. Why is aws_lambda_permission needed?
-
 👉 It allows EventBridge to securely invoke Lambda.
 
 Q4. Can EventBridge trigger services other than Lambda?
-
 ✅ Yes – SNS, SQS, Step Functions, ECS, API Destinations.
 
 📝 One-Line Interview Answer
-
 EventBridge schedules events and triggers Lambda automatically using IAM permissions.
 
 ✅ Final Status
-
 ✔ Terraform applied successfully
 ✔ Lambda scheduled every 5 minutes
-✔ Event-driven automation achieved -->
+✔ Event-driven automation achieved
