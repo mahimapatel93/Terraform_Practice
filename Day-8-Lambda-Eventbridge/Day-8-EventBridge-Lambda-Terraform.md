@@ -101,6 +101,7 @@ resource "aws_iam_role_policy_attachment" "lambda_logging" {
   role       = aws_iam_role.lambda_exec.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
+
 5️⃣ EventBridge Rule (Cron Schedule)
 Runs the Lambda every 5 minutes using a cron expression.
 
