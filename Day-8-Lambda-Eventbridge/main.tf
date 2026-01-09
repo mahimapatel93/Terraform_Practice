@@ -11,7 +11,7 @@ resource "aws_lambda_function" "my_lambda" {
 
 }
 
-# create iam role for lambda
+# create iam role for lambda function because lambda needs permissions to execute
 resource "aws_iam_role" "lambda_exec" {
   name = "lambda_exec_role"
 
@@ -29,13 +29,14 @@ resource "aws_iam_role" "lambda_exec" {
   })
 }
 
-# attach policy to iam role
+# attach policy to iam role for basic lambda execution
 resource "aws_iam_role_policy_attachment" "lambda_policy_attach" {
   role       = aws_iam_role.lambda_exec.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
-# create custom policy for lambda to access rds
+# create custom policy for lambda to access rds 
+#cutom policy is needed because aws managed policy does not have rds access permissions so we create our own policy
 resource "aws_iam_policy" "lambda_rds_policy" {
   name        = "lambda_rds_access_policy"
   description = "Policy for Lambda to access RDS"
@@ -61,13 +62,13 @@ resource "aws_iam_role_policy_attachment" "lambda_rds_policy_attach" {
 }
 
 
-# create eventbridge rule to trigger lambda every 5 minutes (cron expression)
+# create eventbridge rule to trigger lambda every 5 minutes (cron expression) eventbridge is the new name for cloudwatch events 
 resource "aws_cloudwatch_event_rule" "every_5_minutes" {
   name                = "every_5_minutes_rule"
   description         = "Triggers every 5 minutes"
   schedule_expression = "rate(5 minutes)"
 }
-# create eventbridge target to link rule to lambda
+# create eventbridge target to link rule to lambda, cloudwatch event target using lambda arn
 resource "aws_cloudwatch_event_target" "lambda_target" {
   rule      = aws_cloudwatch_event_rule.every_5_minutes.name
   target_id = "my_lambda_target"
