@@ -4,47 +4,46 @@
 
 ## 🎯 Objective
 
-Learn to create and use a **custom Terraform module** to provision an **AWS RDS (MySQL) instance** along with required networking components like **VPC, Subnets, and DB Subnet Group**, using reusable module logic.
+Learn to create and use a **custom Terraform module** to provision an  
+**AWS RDS (MySQL) instance** along with required networking components like:
+
+- VPC
+- Subnets
+- DB Subnet Group  
+using **reusable module logic**.
 
 ---
 
 ## 📖 Definition of Terraform Modules
 
-A **Terraform module** is a collection of Terraform resources that are grouped together to be reused across multiple environments.  
-Modules help in:
+A **Terraform module** is a collection of Terraform resources grouped together for:
 
 - Reusability
 - Clean code structure
 - Passing values dynamically
 - Managing complex infrastructure easily
 
-Modules can be:
-- **Root Module** (where values are passed)
-- **Child Module** (where resources are created)
+### Modules can be:
+- **Root Module** → where values are passed  
+- **Child Module** → where resources are created
 
 ---
 
 ## 📁 Folder Structure
 
+```text
 Terraform_Practice/
-├── Day-9-Custom-RDS-Module/ # Main module
-│ ├── main.tf # VPC, Subnets, RDS, IAM Role
-│ └── variables.tf # Input variables
-└── Day-9-reusing-RDS-Module/ # Root module
-└── main.tf # Module call with values
+├── Day-9-Custom-RDS-Module/        # Child (Main) module
+│   ├── main.tf                    # VPC, Subnets, RDS, IAM Role
+│   └── variables.tf               # Input variables
+└── Day-9-reusing-RDS-Module/       # Root module
+    └── main.tf                    # Module call with values
+📦 Module: Day-9-Custom-RDS-Module
+This module is responsible for creating all AWS resources required for RDS.
 
-
----
-
-## Module: Day-9-Custom-RDS-Module
-
-This module is responsible for creating **all AWS resources**.
-
----
-
-## 1️⃣ variables.tf
-
-```hcl
+1️⃣ variables.tf
+hcl
+Copy code
 variable "vpc_cidr" {
   description = "CIDR block for VPC"
   type        = string
@@ -97,12 +96,12 @@ variable "rds_password" {
 🔑 Logic
 Variables allow dynamic input
 
-Same module can be reused in multiple environments
+Same module can be reused for multiple environments
 
 No hard-coding inside the module
 
 2️⃣ main.tf (Child Module)
-VPC
+🔹 VPC
 hcl
 Copy code
 resource "aws_vpc" "name" {
@@ -112,9 +111,9 @@ Logic:
 
 Creates a private AWS network
 
-RDS must always be inside a VPC
+RDS must always be deployed inside a VPC
 
-Subnets (High Availability)
+🔹 Subnets (High Availability)
 hcl
 Copy code
 resource "aws_subnet" "subnet1" {
@@ -132,11 +131,11 @@ Logic:
 
 RDS requires minimum 2 subnets
 
-Subnets must be in different AZs
+Subnets must be in different Availability Zones
 
 Ensures high availability
 
-DB Subnet Group
+🔹 DB Subnet Group
 hcl
 Copy code
 resource "aws_db_subnet_group" "subnet_group" {
@@ -153,7 +152,7 @@ It requires a DB Subnet Group
 
 Defines where RDS can be launched
 
-IAM Role (Created Only)
+🔹 IAM Role (Created Only)
 hcl
 Copy code
 resource "aws_iam_role" "rds_role" {
@@ -173,15 +172,15 @@ Logic:
 
 IAM role is created for RDS Enhanced Monitoring
 
-Currently:
+Current state:
 
-Role is created
+✅ Role created
 
-Policy is NOT attached
+❌ Policy not attached
 
-Role is NOT assigned to RDS
+❌ Role not assigned to RDS
 
-RDS Instance
+🔹 RDS Instance
 hcl
 Copy code
 resource "aws_db_instance" "rds_instance" {
@@ -199,11 +198,11 @@ Logic:
 
 Creates actual MySQL RDS database
 
-Uses subnet group for networking
+Uses DB subnet group for networking
 
 Username & password used for DB login
 
-Root Module (Module Call)
+3️⃣ Root Module (Module Call)
 hcl
 Copy code
 module "rds_instance" {
@@ -226,14 +225,14 @@ Root module passes values
 
 Child module creates resources
 
-Same module can be reused for different environments
+Same module reusable across environments
 
 📊 Diagram (Module Flow)
-sql
+text
 Copy code
         ┌──────────────────────┐
         │     Root Module      │
-        │ (Values Passed)      │
+        │   (Values Passed)    │
         └─────────┬────────────┘
                   │ calls
                   ▼
@@ -270,4 +269,5 @@ Assigned to service
 Module-based Terraform code is clean, scalable, and professional
 
 🎯 Final Takeaway
-A single custom Terraform module can provision a complete RDS infrastructure while keeping the code reusable, organized, and easy to manage.
+A single custom Terraform module can provision a complete RDS infrastructure
+while keeping the code reusable, organized, and easy to manage.
