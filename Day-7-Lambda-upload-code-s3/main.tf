@@ -27,7 +27,7 @@ resource "aws_iam_role_policy_attachment" "lambda_policy_attach" {
 resource "aws_s3_bucket" "lambda_bucket" {
     bucket = "the-strainger-things" # Bucket name must be globally unique
     tags = {
-        Name        = "Lambda_Bucket"
+        Name = "Lambda_Bucket"
     }
 
 }
@@ -36,7 +36,8 @@ resource "aws_s3_object" "lambda_code" {
     bucket = aws_s3_bucket.lambda_bucket.id
     key    = "app.zip"
     source = "app.zip"
-}
+    etag = filemd5("app.zip")
+    }
 
 
 # create lambda function
@@ -47,7 +48,8 @@ resource "aws_lambda_function" "my_lambda" {
     runtime       = "python3.12"
     timeout       = 900
     memory_size  = 128
-    filename      = "app.zip"
+    s3_key = aws_s3_object.lambda_code.key
+    s3_bucket = aws_s3_bucket.lambda_bucket.id
     source_code_hash = filebase64sha256("app.zip")
 
 }
@@ -55,3 +57,15 @@ resource "aws_lambda_function" "my_lambda" {
  #Without source_code_hash, Terraform might not detect when the code in the ZIP file has changed — meaning your Lambda might not update even after uploading a new ZIP.
 
 #This hash is a checksum that triggers a deployment.
+
+# ETag: Detects ZIP file changes for S3 upload
+# source_code_hash: Triggers Lambda redeployment 
+
+
+# WHY ETag IS REQUIRED :------
+
+# Without etag:
+
+#     Terraform might think nothing changed
+#     ZIP will not be uploaded again
+#     Old code stays in S3

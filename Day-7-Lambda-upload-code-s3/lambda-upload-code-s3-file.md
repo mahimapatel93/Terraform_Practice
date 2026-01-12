@@ -1,21 +1,41 @@
-# Day 7 – Lambda Function Deployment with S3 and IAM Role
+Day 7 – Lambda Function Deployment with S3 and IAM Role
+Objective
 
-## Objective
+Set up an AWS Lambda function with a custom IAM role and S3 bucket using Terraform. Upload the Lambda code to S3 and verify deployment, ensuring Terraform correctly detects code changes.
 
-Set up an AWS Lambda function with a custom IAM role and S3 bucket using Terraform. Upload the Lambda code to S3 and verify deployment.
+Important Concepts
 
-## Important Concepts
+IAM Role: Required for Lambda to access AWS resources securely.
 
-* **IAM Role:** Required for Lambda to access AWS resources securely.
-* **S3 Bucket:** Storage for Lambda code so that Lambda can pull and execute it.
-* **source_code_hash:** Ensures Terraform detects changes in Lambda code and triggers deployment.
-* **Terraform Automation:** Automates infrastructure creation, reducing manual errors.
+S3 Bucket: Stores the Lambda deployment package (ZIP file).
 
-## Steps
+ETag (S3 Object): Helps Terraform detect changes in the uploaded ZIP file and re-upload it to S3.
 
-### 1. Create IAM Role for Lambda
+source_code_hash (Lambda): Ensures Terraform detects Lambda code changes and triggers a redeployment.
 
-```hcl
+Terraform Automation: Automates infrastructure creation, reducing manual errors and configuration drift and configuration drift.
+
+Why ETag and source_code_hash Are Both Needed
+
+When deploying Lambda using S3:
+
+ETag works at the S3 level
+
+Terraform compares the MD5 hash of the local ZIP file with the S3 object
+
+If the hash changes, Terraform re-uploads the file
+
+source_code_hash works at the Lambda level
+
+Terraform compares the SHA256 hash of the ZIP file
+
+If the hash changes, Terraform updates the Lambda function code
+
+👉 Without ETag, S3 may not upload the new ZIP.
+👉 Without source_code_hash, Lambda may continue running old code.
+
+Steps
+1. Create IAM Role for Lambda
 resource "aws_iam_role" "lambda_role" {
   name = "lambda_execution_role"
   assume_role_policy = jsonencode({
@@ -31,64 +51,91 @@ resource "aws_iam_role" "lambda_role" {
     ]
   })
 }
-```
-
-### 2. Attach Policy to the Role
-
-```hcl
+2. Attach Policy to the Role
 resource "aws_iam_role_policy_attachment" "lambda_policy_attach" {
   role       = aws_iam_role.lambda_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
-```
-
-### 3. Create S3 Bucket to Store Lambda Code
-
-```hcl
+3. Create S3 Bucket to Store Lambda Code
 resource "aws_s3_bucket" "lambda_bucket" {
   bucket = "the-strainger-things" # Must be globally unique
   tags = {
     Name = "Lambda_Bucket"
   }
 }
-```
-
-### 4. Upload Lambda Code to S3
-
-```hcl
+4. Upload Lambda Code to S3 (Using ETag)
 resource "aws_s3_object" "lambda_code" {
   bucket = aws_s3_bucket.lambda_bucket.id
   key    = "app.zip"
   source = "app.zip"
+
+
+  etag = filemd5("app.zip")
 }
-```
 
-### 5. Create Lambda Function
+Why ETag is used here:
 
-```hcl
+Ensures Terraform uploads the ZIP again when the file content changes
+
+Prevents stale code from remaining in S3
+
+5. Create Lambda Function (Using source_code_hash)
 resource "aws_lambda_function" "my_lambda" {
-  function_name    = "my_lambda_function"
-  role             = aws_iam_role.lambda_role.arn
-  handler          = "lambda_function.lambda_handler"
-  runtime          = "python3.12"
-  timeout          = 900
-  memory_size      = 128
-  filename         = "app.zip"
+  function_name = "my_lambda_function"
+  role          = aws_iam_role.lambda_role.arn
+  handler       = "lambda_function.lambda_handler"
+  runtime       = "python3.12"
+  timeout       = 900
+  memory_size  = 128
+
+
+  s3_bucket = aws_s3_bucket.lambda_bucket.id
+  s3_key    = aws_s3_object.lambda_code.key
+
+
   source_code_hash = filebase64sha256("app.zip")
 }
-```
 
-## Verification
+Why source_code_hash is required:
 
-* Confirm the Lambda function is deployed in AWS Console.
-* Test the function execution to ensure it works correctly.
-* Check logs in CloudWatch for debugging.
+Terraform does not automatically detect ZIP changes
 
-## Key Takeaways
+This hash forces Lambda code redeployment when the ZIP changes
 
-* Terraform can **automate infrastructure setup** for Lambda functions.
-* **IAM roles** and **policies** are essential for secure access.
-* Uploading Lambda code to **S3** allows better version control and deployment management.
-* **source_code_hash** ensures updated code triggers redeployment.
+Why ETag and source_code_hash Are Both Needed
 
-> Automated creation of S3 bucket, Lambda function, and IAM role with Terraform; uploaded Lambda code to S3 and successfully verified the deployment.
+When deploying Lambda using S3:
+
+ETag works at the S3 level
+
+Terraform compares the MD5 hash of the local ZIP file with the S3 object
+
+If the hash changes, Terraform re-uploads the file to S3
+
+source_code_hash works at the Lambda level
+
+Terraform compares the SHA256 hash of the ZIP file
+
+If the hash changes, Terraform updates the Lambda function code
+
+👉 Without ETag, S3 may not upload the new ZIP.
+
+👉 Without source_code_hash, Lambda may continue running old code.
+
+Verification
+
+Confirm the Lambda function is deployed in AWS Console.
+
+Test the function execution to ensure it works correctly.
+
+Check logs in CloudWatch for debugging.
+
+Key Takeaways
+
+ETag ensures updated code is uploaded to S3
+
+source_code_hash ensures updated code is deployed to Lambda
+
+Both are required to keep S3 and Lambda fully in sync
+
+Terraform provides a repeatable and reliable deployment process
