@@ -17,16 +17,6 @@ resource "aws_vpc" "vpc" {
 
 
 
-
-
-
-
-
-
-
-
-
-
 #cammand :------------------
 #terraform plan -target=aws_instance.name
 # terraform apply -target=aws_instance.name
