@@ -40,6 +40,8 @@ resource "aws_instance" "name1" {
     create_before_destroy = true
   }
 }
+
+
 🔹 1. create_before_destroy
 ✅ What it does
 Creates a new resource first
@@ -65,6 +67,8 @@ New EC2 created
 
 Old EC2 destroyed
 
+
+
 🔹 2. prevent_destroy
 ✅ What it does
 Blocks accidental deletion
@@ -82,6 +86,8 @@ bash
 
 terraform destroy
 ➡️ ❌ Error: Resource cannot be destroyed
+
+
 
 🔹 3. ignore_changes
 ✅ What it does
@@ -119,6 +125,7 @@ instance_type (if updatable)
 
 metadata changes
 
+
 🧠 ForceNew vs Update
 Attribute	Behavior
 ami	ForceNew ❌
@@ -132,6 +139,7 @@ ignore_changes → don’t update
 create_before_destroy → safe replace
 prevent_destroy → don’t delete
 
+
 🎯 Real-World Usage
 create_before_destroy → Zero downtime deployments
 
@@ -139,8 +147,10 @@ prevent_destroy → Protect production resources
 
 ignore_changes → Ignore auto/manual changes
 
+
 ✅ Interview Line
 “We use lifecycle rules in Terraform to control resource replacement, prevent accidental deletion, and ignore non-critical changes.”
+
 
 📌 Conclusion
 Lifecycle rules give fine-grained control over Terraform behavior and are very important in production infrastructure.
