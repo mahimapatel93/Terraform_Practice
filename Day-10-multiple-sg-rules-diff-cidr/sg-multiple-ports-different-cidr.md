@@ -62,13 +62,11 @@ resource "aws_security_group" "devops_project_mahi" {
 
 🔍 Explanation
 1️⃣ dynamic "ingress"
-
 Loops through each key/value in allowed_ports map
 Creates one ingress rule per port with its respective allowed CIDR
 
 
 2️⃣ Port Specific Rules
-
 Port	CIDR	Purpose
 22	203.0.113.0/24	SSH from office only
 80	0.0.0.0/0	HTTP public
@@ -87,11 +85,8 @@ Helps identify the Security Group easily in AWS
 
 🧠 Why Use This Approach
 Avoids duplicate ingress blocks
-
 Easy to manage multiple ports with different IP ranges
-
 Dynamic and maintainable
-
 Recommended in production Terraform projects
 
 📝 Interview Line
