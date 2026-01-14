@@ -23,14 +23,16 @@ variable "allowed_ports" {
     3389  = "10.0.1.0/24"       # RDP / Remote desktop
   }
 }
+
+
 🔑 Key Point
 Using a map variable allows flexible CIDR per port
-
 Easy to add/remove ports or change IP ranges
+
 
 🧱 Security Group with Dynamic Ingress
 hcl
-Copy code
+
 resource "aws_security_group" "devops_project_mahi" {
   name        = "devops-project-veera"
   description = "Allow restricted inbound traffic"
@@ -57,13 +59,16 @@ resource "aws_security_group" "devops_project_mahi" {
     Name = "devops-project-mahi"
   }
 }
+
 🔍 Explanation
 1️⃣ dynamic "ingress"
-Loops through each key/value in allowed_ports map
 
+Loops through each key/value in allowed_ports map
 Creates one ingress rule per port with its respective allowed CIDR
 
+
 2️⃣ Port Specific Rules
+
 Port	CIDR	Purpose
 22	203.0.113.0/24	SSH from office only
 80	0.0.0.0/0	HTTP public
@@ -72,9 +77,9 @@ Port	CIDR	Purpose
 9000	192.168.1.0/24	Jenkins/SonarQube via VPN
 3389	10.0.1.0/24	Remote desktop
 
+
 3️⃣ Egress Rule
 Allows all outbound traffic
-
 Required for updates, API calls, and internet access
 
 4️⃣ Tags
