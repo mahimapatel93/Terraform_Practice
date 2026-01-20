@@ -2,13 +2,13 @@
 
 ---
 
-## 🎯 Objective
+##  Objective
 
 Understand **Terraform lifecycle rules** and how they control **resource creation, update, and deletion**, using an **AWS EC2 instance** example.
 
 ---
 
-## 📌 What are Lifecycle Rules?
+##  What are Lifecycle Rules?
 
 Lifecycle rules allow you to **customize Terraform behavior** when resources change.
 
@@ -16,7 +16,7 @@ They are defined inside a resource using the `lifecycle {}` block.
 
 ---
 
-## 🔑 Types of Lifecycle Rules
+##  Types of Lifecycle Rules
 
 1. `create_before_destroy`
 2. `prevent_destroy`
@@ -24,7 +24,7 @@ They are defined inside a resource using the `lifecycle {}` block.
 
 ---
 
-## 🧩 EC2 Example Code
+##  EC2 Example Code
 
 ```hcl
 resource "aws_instance" "name1" {
