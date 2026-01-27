@@ -1,0 +1,4 @@
+[submodule "3-tier-app-infra"]
+    path = 3-tier-app-infra
+    url = https://github.com/mahimapatel93/Terraform_Practice.git
+
